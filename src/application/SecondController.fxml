@@ -1,11 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
 <AnchorPane prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.SecondController">
    <children>
-      <ImageView fx:id="img1" fitHeight="600.0" fitWidth="600.0" layoutX="-2.0" layoutY="-1.0" pickOnBounds="true" preserveRatio="true" />
+      <BorderPane prefHeight="600.0" prefWidth="600.0">
+         <center>
+            <ImageView fx:id="imgView" fitHeight="600.0" fitWidth="600.0" onMouseMoved="#moverRaton" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
+               <viewport>
+                  <Rectangle2D />
+               </viewport>
+            </ImageView>
+         </center>
+         <bottom>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label fx:id="infoTamTipo" prefHeight="21.0" prefWidth="195.0" />
+                  <Label fx:id="infoPos" prefHeight="21.0" prefWidth="163.0" GridPane.columnIndex="1" />
+                  <Label fx:id="infoColor" prefHeight="21.0" prefWidth="163.0" GridPane.columnIndex="2" />
+               </children>
+            </GridPane>
+         </bottom>
+      </BorderPane>
    </children>
 </AnchorPane>

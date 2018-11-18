@@ -42,33 +42,34 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	 */
 	public void abrirVentana(ActionEvent event) throws IOException {
 		FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter extFilterTiff = new FileChooser.ExtensionFilter("Archivos tiff", "*.tiff");
+		FileChooser.ExtensionFilter extFilterTiff = new FileChooser.ExtensionFilter("Archivos tiff", "*.tiff", "*.TIF");
 		FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("Archivos JPG", "*.jpg");
 		fileChooser.getExtensionFilters().addAll(extFilterTiff);
 		fileChooser.getExtensionFilters().addAll(extFilterJPG);
 		File file = fileChooser.showOpenDialog(null);		
-		//////////////////////////////////Hasta aquí es para filtrar los jpg, y tiff y poder elegirlos y guardarlos en el file
+		//////////////////////////// Hasta aquí es para filtrar los jpg, y tiff y poder elegirlos y guardarlos en el file
 		try {
 			BufferedImage img1 = ImageIO.read(file);
 			Image image = SwingFXUtils.toFXImage(img1, null);
 			imagen = image;
 			imagenes.add(imagen); //metemos la imagen abierta en el arrayList
-		/////////////////////////////////// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
+			/////////////////////////////////// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
 
-		}catch(IOException ex) {
+		} catch(IOException ex) {
 			System.out.println(ex.getMessage());
 		}		
 				
 		try {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("SecondController.fxml"));
-		Parent root = (Parent)loader.load();
-		SecondController secController = loader.getController();
-		secController.nuevaImagen(imagen);
-		Stage stage= new Stage();
-		stage.setScene(new Scene(root));
-		stage.show();
-		////////////////////////////////// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
-		}catch(IOException e) {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("SecondController.fxml"));
+			Parent root = (Parent)loader.load();
+			SecondController secController = loader.getController();
+			secController.nuevaImagen(imagen);
+			secController.mostrarInfo(imagen); // Hacer que el controlador de la imagen muestre la info
+			Stage stage = new Stage();
+			stage.setScene(new Scene(root));
+			stage.show();
+			////////////////////////////////// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
+		} catch(IOException e) {
 			System.out.println(e.getMessage());
 		}/////Fin de evento				
 	}
@@ -84,7 +85,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		File file = filechooser.showSaveDialog(null);
 		ruta = file.getAbsolutePath();
 		//////////////////////Pillar donde se quiere guardar
-		if(!ruta.endsWith(".tiff")) {
+		if(!ruta.endsWith(".tiff") && !ruta.endsWith(".TIF")) {
 			file = new File(ruta + ".tiff");
 			ruta = ruta + ".tiff";
 		}
