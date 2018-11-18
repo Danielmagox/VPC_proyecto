@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="273.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MainController">
+<AnchorPane prefHeight="700.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.MainController">
    <children>
-      <Button layoutX="34.0" layoutY="30.0" mnemonicParsing="false" onAction="#abrirVentana" text="Abrir ventana" />
-      <ImageView fx:id="myImageView" fitHeight="150.0" fitWidth="200.0" layoutX="191.0" layoutY="86.0" pickOnBounds="true" preserveRatio="true" />
+      <Button layoutX="34.0" layoutY="30.0" mnemonicParsing="false" onAction="#abrirVentana" text="Abrir Imagen" />
+      <Button layoutX="215.0" layoutY="30.0" mnemonicParsing="false" onAction="#guardarImagen" prefHeight="31.0" prefWidth="155.0" text="Guardar Imagen" />
    </children>
 </AnchorPane>

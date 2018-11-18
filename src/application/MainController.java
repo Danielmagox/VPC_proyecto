@@ -15,51 +15,85 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageOutputStream;
 
 import com.sun.istack.internal.logging.Logger;
 
-//donde van los eventos de los botones
-public class MainController { //esto permite usar el objeto en el scene Builder
-	@FXML  
-	private Label myMessage;
-	@FXML
-	private ImageView myImageView;
-	@FXML
-	private Label prueba;
 	
+/**
+ * Controlador de la ventana principal donde se abre la imagen en otra ventana y se puede escoger donde guardarla
+ *
+ */
+public class MainController { //esto permite usar el objeto en el scene Builder
+	
+	static Image imagen;  //IMAGEN QUE ABRIMOS, SE GUARDA AQUI COMO ESTATICA PARA TRABAJAR CON ELLA.
+	static ArrayList<Image> imagenes = new ArrayList<Image>(); //por si creamos muchas imagenes
+	/**
+	 * @param event evento que se manda al boton para abrir la nueva ventana y el 2º Controller con la imagen dentro
+	 * @throws IOException Por si explota
+	 */
 	public void abrirVentana(ActionEvent event) throws IOException {
-//		Parent root = FXMLLoader.load(getClass().getResource("Ventana2.fxml"));
-//		Scene secondScene = new Scene(root,800,800);
-//		Stage newWindow = new Stage();
-//		newWindow.setTitle("Imagen");
-//		newWindow.setScene(secondScene);
-//		newWindow.setX(100);
-//		newWindow.setY(100);
-//		newWindow.show();
-		/////// Hasta aquí abrir nueva ventana que se opera en el Ventana2.fxml //////
 		FileChooser fileChooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilterTiff = new FileChooser.ExtensionFilter("Archivos tiff", "*.tiff");
 		FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("Archivos JPG", "*.jpg");
 		fileChooser.getExtensionFilters().addAll(extFilterTiff);
 		fileChooser.getExtensionFilters().addAll(extFilterJPG);
-		File file = fileChooser.showOpenDialog(null);
-		
+		File file = fileChooser.showOpenDialog(null);		
+		//////////////////////////////////Hasta aquí es para filtrar los jpg, y tiff y poder elegirlos y guardarlos en el file
 		try {
 			BufferedImage img1 = ImageIO.read(file);
 			Image image = SwingFXUtils.toFXImage(img1, null);
-			myImageView.setImage(image);
-			
+			imagen = image;
+			imagenes.add(imagen); //metemos la imagen abierta en el arrayList
+		/////////////////////////////////// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
 
 		}catch(IOException ex) {
 			System.out.println(ex.getMessage());
-		}
-		
-		
+		}		
+				
+		try {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("SecondController.fxml"));
+		Parent root = (Parent)loader.load();
+		SecondController secController = loader.getController();
+		secController.nuevaImagen(imagen);
+		Stage stage= new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+		////////////////////////////////// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
+		}catch(IOException e) {
+			System.out.println(e.getMessage());
+		}/////Fin de evento				
 	}
 	
+	/**
+	 * @param event	Evento asociado a un botón en el que si le damos se abre un filechooser donde podemos elegir el sitio donde guardar la imagen (por ahora solo en .tiff)
+	 * @throws IOException Por si explota
+	 */
+	public void guardarImagen(ActionEvent event) throws IOException {
+		String ruta;
+		FileChooser filechooser = new FileChooser();
+		filechooser.setTitle("Guardar Imagen");
+		File file = filechooser.showSaveDialog(null);
+		ruta = file.getAbsolutePath();
+		//////////////////////Pillar donde se quiere guardar
+		if(!ruta.endsWith(".tiff")) {
+			file = new File(ruta + ".tiff");
+			ruta = ruta + ".tiff";
+		}
+		/////////////////////Si no se le pone la extensión se la pongo yo
+		if(file != null) {
+			ImageOutputStream ios = ImageIO.createImageOutputStream(file);
+			ImageIO.write(SwingFXUtils.fromFXImage(imagen,null), "tiff", ios);
+		////////////////////Se guarda la imagen
+                    										
+		}
+	}
 }
