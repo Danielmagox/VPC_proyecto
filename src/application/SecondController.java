@@ -16,7 +16,7 @@ import javafx.scene.input.MouseEvent;
  * el hilo de la primera ventana peta con NullPointerException porque no encuentra donde abrir el ImageView de aquí.
  *
  */
-public class SecondController implements Initializable {
+public class SecondController {
 	
 	private Image img;
 	@FXML
@@ -29,10 +29,7 @@ public class SecondController implements Initializable {
 	@FXML
 	private Label infoColor = new Label();	// color en la ubicacion del raton
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		
-	}
+	
 	
 	public void nuevaImagen(Image imagen) {
 		imgView.setFitWidth(imagen.getWidth());
@@ -58,18 +55,7 @@ public class SecondController implements Initializable {
 	
 	public void infoColor(MouseEvent event) {
 		int argb = img.getPixelReader().getArgb((int) event.getX(), (int) event.getY());
-		infoColor.setText("R: " + argbToRed(argb) + " G: " + argbToGreen(argb) + " B: " + argbToBlue(argb));
-	}
-	
-	public int argbToRed(int argb) {
-		return (argb >> 16) & 0xff;
-	}
-	
-	public int argbToGreen(int argb) {
-		return (argb >> 8) & 0xff;
-	}
-	
-	public int argbToBlue(int argb) {
-		return argb & 0xff;
+		infoColor.setText("R: " + MainController.argbToRed(argb) + " G: " + MainController.argbToGreen(argb)
+							+ " B: " + MainController.argbToBlue(argb));
 	}
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="587.0" prefWidth="1064.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.HistogramController">
+   <children>
+      <BarChart fx:id="barChart" prefHeight="587.0" prefWidth="1064.0" title="Histograma">
+        <xAxis>
+          <CategoryAxis label="Nivel de gris" side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis label="Nº de píxels" side="LEFT" />
+        </yAxis>
+      </BarChart>
+   </children>
+</AnchorPane>
