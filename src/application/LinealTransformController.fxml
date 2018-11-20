@@ -11,8 +11,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
-<AnchorPane minHeight="700.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="application.LinealTransformController">
+<AnchorPane minHeight="700.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.LinealTransformController">
    <children>
       <Label layoutX="78.0" layoutY="54.0" text="Introduzca el nº de tramos" />
       <Button layoutX="130.0" layoutY="144.0" mnemonicParsing="false" onAction="#numeroTramosIntroducido" text="Aceptar" />
@@ -37,6 +36,6 @@
         </yAxis>
       </LineChart>
       <Button fx:id="verGrafico" layoutX="120.0" layoutY="201.0" mnemonicParsing="false" onAction="#hacerGrafico" text="Ver gráfico" visible="false" />
-      <Button fx:id="aplicarFiltro" layoutX="115.0" layoutY="265.0" mnemonicParsing="false" text="Aplicar Filtro" />
+      <Button fx:id="aplicarFiltro" layoutX="115.0" layoutY="265.0" mnemonicParsing="false" onAction="#aplicarFiltro" text="Aplicar Filtro" visible="false" />
    </children>
 </AnchorPane>

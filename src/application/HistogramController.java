@@ -20,4 +20,15 @@ public class HistogramController {
         
         barChart.getData().add(series);
 	}
+	
+	public void mostrarHistograma(HistogramaAcumulativo h) {    
+        XYChart.Series<String, Number> series = new XYChart.Series<String, Number>();
+        series.setName("Píxeles por nivel");
+        
+        for(int i = 0; i < h.numPixels.size(); i++) {
+        	series.getData().add(new XYChart.Data<String, Number>("" + i, h.getNumPixels(i)));
+        }
+        
+        barChart.getData().add(series);
+	}
 }

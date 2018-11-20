@@ -118,11 +118,47 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		imagenes.add(datosImagen);
 	}
 	
+	public void abrirMensaje(String texto) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("SimpleMessageController.fxml"));
+		Parent root = (Parent) loader.load();
+		SimpleMessageController smc = loader.getController();
+		smc.setMessage(texto);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void verRangoValores(ActionEvent event) throws IOException {
+		abrirMensaje("Rango de valores: " + datosImagen.grisMin + " - " + datosImagen.grisMax);
+	}
+	
+	public void verBrillo(ActionEvent event) throws IOException {
+		abrirMensaje("Brillo: " + datosImagen.brillo);
+	}
+	
+	public void verContraste(ActionEvent event) throws IOException {
+		abrirMensaje("Contraste: " + datosImagen.contraste);
+	}
+	
+	public void verEntropia(ActionEvent event) throws IOException {
+		abrirMensaje("Entropía: " + datosImagen.entropia);
+	}
+	
 	public void mostrarHistograma(ActionEvent event) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("HistogramController.fxml"));
 		Parent root = (Parent) loader.load();
 		HistogramController histogramController = loader.getController();
 		histogramController.mostrarHistograma(datosImagen.histograma);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void mostrarHistogramaAcumulativo(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("HistogramController.fxml"));
+		Parent root = (Parent) loader.load();
+		HistogramController histogramController = loader.getController();
+		histogramController.mostrarHistograma(datosImagen.hAcumulativo);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
@@ -154,13 +190,56 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	public void transformacionLinealTramos(ActionEvent event) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("LinealTransformController.fxml"));
 		Parent root = (Parent) loader.load();
+		LinealTransformController ltf = loader.getController();
+		ltf.addMainController(this);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
 	}
 	
-	public static void aplicarTransformacionLinealTramos(Integer[][] puntos) {
+	public void aplicarTransformacionLinealTramos(Integer[][] puntos) {
+		Integer[] LUT = new Integer[256];
 		
+		// En principio todos los niveles de gris se mapean igual, donde esté definida la t. lineal cambiará
+		for(int i = 0; i <= 255; i++) {
+			LUT[i] = i;
+		}
+		
+		double m, n; // Recta = mx + n
+		for(int i = 1; i < puntos.length; i++) {
+			m = pendienteRecta(puntos[i-1][0], puntos[i-1][1], puntos[i][0], puntos[i][1]);
+			n = origenRecta(puntos[i-1][0], puntos[i-1][1], m);
+			for(int j = puntos[i-1][0]; j <= puntos[i][0]; j++)
+				LUT[j] = (int) Math.round(j * m + n);
+		}
+		
+		aplicarLUT(LUT);
+	}
+	
+	public void aplicarLUT(Integer[] LUT) {
+		int width = (int) datosImagen.imagen.getWidth();
+		int height = (int) datosImagen.imagen.getHeight();
+		PixelReader reader = datosImagen.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(width, height);
+		PixelWriter writer = img.getPixelWriter();
+		
+		int color, r, g, b;
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				color = reader.getArgb(i, j);
+				r = LUT[argbToRed(color)];
+				b = LUT[argbToBlue(color)];
+				g = LUT[argbToGreen(color)];
+				writer.setArgb(i, j, rgbToArgb(r, g, b));
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static int argbToRed(int argb) {
@@ -181,5 +260,13 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	
 	public static int rgbToArgb(int r, int g, int b) {
 		return (255 << 24) + (r << 16) + (g << 8) + b;
+	}
+	
+	public static double pendienteRecta(double x1, double y1, double x2, double y2) {
+		return (y2 - y1) / (x2 - x1);
+	}
+	
+	public static double origenRecta(double x, double y, double m) {
+		return y - m * x;
 	}
 }

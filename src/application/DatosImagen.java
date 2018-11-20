@@ -15,11 +15,11 @@ public class DatosImagen {
 	
 	public DatosImagen(Image img) {
 		imagen = img;
-		size = (int) (imagen.getWidth() * imagen.getHeight());
 		update();
 	}
 	
 	public void update() {
+		size = (int) (imagen.getWidth() * imagen.getHeight());
 		histograma = new Histograma(imagen);
 		hAcumulativo = new HistogramaAcumulativo(histograma);
 		calcularRangoValores();

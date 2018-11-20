@@ -31,6 +31,8 @@ public class LinealTransformController {
 	@FXML
 	Button aplicarFiltro;
 	
+	MainController mc;
+	
 	
 	public void numeroTramosIntroducido(ActionEvent event) {
 		nTramos = new Integer(numeroTramos.getText());
@@ -66,9 +68,14 @@ public class LinealTransformController {
         }
         
         lineChart.getData().add(series);
+        aplicarFiltro.setVisible(true);
 	}
 	
 	public void aplicarFiltro(ActionEvent event) {
-		MainController.aplicarTransformacionLinealTramos(puntos);
+		mc.aplicarTransformacionLinealTramos(puntos);
+	}
+	
+	public void addMainController(MainController mc) {
+		this.mc = mc;
 	}
 }
