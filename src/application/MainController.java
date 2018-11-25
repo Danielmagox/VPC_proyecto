@@ -22,6 +22,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -128,20 +129,13 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		stage.show();
 	}
 	
-	public void verRangoValores(ActionEvent event) throws IOException {
-		abrirMensaje("Rango de valores: " + datosImagen.grisMin + " - " + datosImagen.grisMax);
-	}
-	
-	public void verBrillo(ActionEvent event) throws IOException {
-		abrirMensaje("Brillo: " + datosImagen.brillo);
-	}
-	
-	public void verContraste(ActionEvent event) throws IOException {
-		abrirMensaje("Contraste: " + datosImagen.contraste);
-	}
-	
-	public void verEntropia(ActionEvent event) throws IOException {
-		abrirMensaje("Entropía: " + datosImagen.entropia);
+	public void verInfoBasica(ActionEvent event) throws IOException {
+		DecimalFormat df = new DecimalFormat("#.00");
+		String info = "Rango de valores: " + datosImagen.grisMin + " - " + datosImagen.grisMax + "\n";
+		info += "Brillo: " + df.format(datosImagen.brillo) + "\n";
+		info += "Contraste: " + df.format(datosImagen.contraste) + "\n";
+		info += "Entropía: " + df.format(datosImagen.entropia) + "\n";
+		abrirMensaje(info);
 	}
 	
 	public void mostrarHistograma(ActionEvent event) throws IOException {
@@ -190,8 +184,8 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	public void transformacionLinealTramos(ActionEvent event) throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("LinealTransformController.fxml"));
 		Parent root = (Parent) loader.load();
-		LinealTransformController ltf = loader.getController();
-		ltf.addMainController(this);
+		LinealTransformController ltc = loader.getController();
+		ltc.addMainController(this);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
@@ -211,6 +205,33 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 			n = origenRecta(puntos[i-1][0], puntos[i-1][1], m);
 			for(int j = puntos[i-1][0]; j <= puntos[i][0]; j++)
 				LUT[j] = (int) Math.round(j * m + n);
+		}
+		
+		aplicarLUT(LUT);
+	}
+	
+	public void cambiarBrilloContraste(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("BrilloContrasteController.fxml"));
+		Parent root = (Parent) loader.load();
+		BrilloContrasteController bcc = loader.getController();
+		bcc.addMainController(this);
+		bcc.brilloContrasteActuales(datosImagen.brillo, datosImagen.contraste);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void actualizarBrilloContraste(float nuevoBrillo, float nuevoContraste) {
+		Integer[] LUT = new Integer[256];
+		
+		// Vout = m * Vin + n
+		double m = nuevoContraste / datosImagen.contraste;
+		double n = nuevoBrillo - m * datosImagen.brillo;
+		
+		for(int i = 0; i <= 255; i++) {
+			LUT[i] = (int) Math.min(Math.round(m * i + n), 255);
+			if(LUT[i] < 0)
+				LUT[i] = 0;
 		}
 		
 		aplicarLUT(LUT);
@@ -255,7 +276,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	}
 	
 	public static int argbToGrey(int argb) {
-		return (int) Math.round(0.299 * argbToRed(argb) + 0.587 * argbToGreen(argb) + 0.114 * argbToBlue(argb)) % 256; 
+		return (int) Math.min(Math.round(0.299 * argbToRed(argb) + 0.587 * argbToGreen(argb) + 0.114 * argbToBlue(argb)), 255); 
 	}
 	
 	public static int rgbToArgb(int r, int g, int b) {

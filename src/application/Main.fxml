@@ -15,12 +15,11 @@
                   <Button mnemonicParsing="false" onAction="#abrirVentana" text="Abrir Imagen" />
                   <Button mnemonicParsing="false" onAction="#guardarImagen" prefHeight="31.0" prefWidth="155.0" text="Guardar Imagen" />
                   <Button mnemonicParsing="false" onAction="#mostrarHistograma" text="Histograma" />
-                  <Button mnemonicParsing="false" onAction="#verRangoValores" text="Rango de valores" />
-                  <Button mnemonicParsing="false" onAction="#verBrillo" text="Brillo" />
-                  <Button mnemonicParsing="false" onAction="#verContraste" text="Contraste" />
-                  <Button mnemonicParsing="false" onAction="#verEntropia" text="Entropía" />
+                  <Button mnemonicParsing="false" onAction="#mostrarHistogramaAcumulativo" text="Histograma Acumulativo" />
+                  <Button mnemonicParsing="false" onAction="#verInfoBasica" text="Información de la imagen" />
                   <Button mnemonicParsing="false" onAction="#escalaDeGrises" text="Pasar a escala de grises" />
                   <Button mnemonicParsing="false" onAction="#transformacionLinealTramos" text="Transformación lineal por tramos" />
+                  <Button mnemonicParsing="false" onAction="#cambiarBrilloContraste" text="Cambiar brillo y contraste" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" top="5.0" />
