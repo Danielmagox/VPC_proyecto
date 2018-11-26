@@ -20,6 +20,7 @@
                   <Button mnemonicParsing="false" onAction="#escalaDeGrises" text="Pasar a escala de grises" />
                   <Button mnemonicParsing="false" onAction="#transformacionLinealTramos" text="Transformación lineal por tramos" />
                   <Button mnemonicParsing="false" onAction="#cambiarBrilloContraste" text="Cambiar brillo y contraste" />
+                  <Button mnemonicParsing="false" onAction="#quitarRoi" text="Quitar ROI" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" top="5.0" />

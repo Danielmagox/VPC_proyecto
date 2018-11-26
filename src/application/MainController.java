@@ -69,13 +69,14 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 			SecondController secController = loader.getController();
 			secController.nuevaImagen(datosImagen.imagen);
 			secController.mostrarInfo(datosImagen.imagen); // Hacer que el controlador de la imagen muestre la info
+			secController.addMainController(this);
 			Stage stage = new Stage();
 			stage.setScene(new Scene(root));
 			stage.show();
-			////////////////////////////////// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
+			///// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
 		} catch(IOException e) {
 			System.out.println(e.getMessage());
-		}/////Fin de evento
+		} ////Fin de evento
 		for(DatosImagen i: imagenes) {
 			System.out.println(i);
 		}
@@ -111,6 +112,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		SecondController secController = loader.getController();
 		secController.nuevaImagen(imagen);
 		secController.mostrarInfo(imagen); // Hacer que el controlador de la imagen muestre la info
+		secController.addMainController(this);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
@@ -166,9 +168,16 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
 		
-		int nivelGris;
+		// En principio copiamos la imagen por si después solo modificamos una ROI
 		for(int i = 0; i < width; i++) {
-			for(int j = 0; j < height; j++) {
+			for(int j = 0; j < height; j++) {	
+				writer.setArgb(i, j, reader.getArgb(i, j));
+			}
+		}
+		
+		int nivelGris;
+		for(int i = datosImagen.x1Roi; i < datosImagen.x2Roi; i++) {
+			for(int j = datosImagen.y1Roi; j < datosImagen.y2Roi; j++) {
 				nivelGris = argbToGrey(reader.getArgb(i, j));
 				writer.setArgb(i, j, rgbToArgb(nivelGris, nivelGris, nivelGris));
 			}
@@ -245,9 +254,17 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
 		
-		int color, r, g, b;
+		
+		// En principio copiamos la imagen por si después solo modificamos una ROI
 		for(int i = 0; i < width; i++) {
-			for(int j = 0; j < height; j++) {
+			for(int j = 0; j < height; j++) {	
+				writer.setArgb(i, j, reader.getArgb(i, j));
+			}
+		}
+			
+		int color, r, g, b;
+		for(int i = datosImagen.x1Roi; i < datosImagen.x2Roi; i++) {
+			for(int j = datosImagen.y1Roi; j < datosImagen.y2Roi; j++) {
 				color = reader.getArgb(i, j);
 				r = LUT[argbToRed(color)];
 				b = LUT[argbToBlue(color)];
@@ -261,6 +278,17 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void quitarRoi(ActionEvent event) throws IOException {
+		datosImagen.quitarRoi();
+	}
+	
+	public void aplicarRoi(int x1, int y1, int x2, int y2) {
+		datosImagen.x1Roi = x1;
+		datosImagen.y1Roi = y1;
+		datosImagen.x2Roi = x2;
+		datosImagen.y2Roi = y2;
 	}
 	
 	public static int argbToRed(int argb) {

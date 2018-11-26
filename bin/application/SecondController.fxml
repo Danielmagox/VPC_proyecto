@@ -7,18 +7,13 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Rectangle?>
 
 <AnchorPane prefHeight="600.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.SecondController">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="600.0">
-         <center>
-            <ImageView fx:id="imgView" fitHeight="600.0" fitWidth="600.0" onMouseMoved="#moverRaton" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER">
-               <viewport>
-                  <Rectangle2D />
-               </viewport>
-            </ImageView>
-         </center>
          <bottom>
             <GridPane BorderPane.alignment="CENTER">
               <columnConstraints>
@@ -36,6 +31,18 @@
                </children>
             </GridPane>
          </bottom>
+         <center>
+            <Pane prefHeight="10.0" prefWidth="10.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ImageView fx:id="imgView" fitHeight="600.0" fitWidth="600.0" onMouseDragged="#dibujarRoi" onMouseMoved="#moverRaton" onMousePressed="#comenzarRoi" onMouseReleased="#acabarRoi" pickOnBounds="true" preserveRatio="true">
+                     <viewport>
+                        <Rectangle2D />
+                     </viewport>
+                  </ImageView>
+                  <Rectangle fx:id="roi" arcHeight="5.0" arcWidth="5.0" fill="#ff000000" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+               </children>
+            </Pane>
+         </center>
       </BorderPane>
    </children>
 </AnchorPane>
