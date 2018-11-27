@@ -2,17 +2,21 @@ package application;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -40,6 +44,14 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	
 	static DatosImagen datosImagen;  //DATOS DE LA IMAGEN QUE ABRIMOS, SE GUARDAN AQUI COMO ESTATICOS PARA TRABAJAR CON ELLOS.
 	static ArrayList<DatosImagen> imagenes = new ArrayList<DatosImagen>(); //por si creamos muchas imagenes
+	
+	@FXML
+	Label auxLabel;
+	@FXML
+	TextField auxTextField;
+	@FXML
+	Button auxButton;
+	
 	/**
 	 * @param event evento que se manda al boton para abrir la nueva ventana y el 2º Controller con la imagen dentro
 	 * @throws IOException Por si explota
@@ -241,6 +253,92 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 			LUT[i] = (int) Math.min(Math.round(m * i + n), 255);
 			if(LUT[i] < 0)
 				LUT[i] = 0;
+		}
+		
+		aplicarLUT(LUT);
+	}
+	
+	public void ecualizar(ActionEvent event) throws IOException {
+		Integer[] LUT = new Integer[256];
+		ArrayList<Integer> hAcumulativo = datosImagen.hAcumulativo.numPixels;
+		
+		for(int i = 0; i <= 255; i++) {
+			LUT[i] = Math.max(0, Math.round(256F/datosImagen.size * hAcumulativo.get(i)) - 1);
+		}
+		
+		aplicarLUT(LUT);
+	}
+	
+	public void especificarHistograma(ActionEvent event) throws IOException {
+		DatosImagen imagenEscogida = null;
+		FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter extFilterTiff = new FileChooser.ExtensionFilter("Archivos tiff", "*.tiff", "*.TIF");
+		FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("Archivos JPG", "*.jpg");
+		fileChooser.getExtensionFilters().addAll(extFilterTiff);
+		fileChooser.getExtensionFilters().addAll(extFilterJPG);
+		File file = fileChooser.showOpenDialog(null);		
+		try {
+			BufferedImage img1 = ImageIO.read(file);
+			Image image = SwingFXUtils.toFXImage(img1, null);
+			imagenEscogida = new DatosImagen(image);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.getMessage());
+		}
+		
+		Integer[] LUT = new Integer[256];
+		ArrayList<Double> hAcActual = new ArrayList<Double>();
+		ArrayList<Double> hAcDeseado = new ArrayList<Double>();
+		
+		// Obtener histogramas normalizados
+		for(int i = 0; i <= 255; i++) {
+			hAcActual.add((double) datosImagen.hAcumulativo.getNumPixels(i) / datosImagen.size);
+			hAcDeseado.add((double) imagenEscogida.hAcumulativo.getNumPixels(i) / imagenEscogida.size);
+		}
+		
+		double numPixels;
+		int nivelGris = 0;
+		for(int i = 0; i <= 255; i++) {
+			numPixels = hAcActual.get(i);
+			while(numPixels > hAcDeseado.get(nivelGris)) {
+				nivelGris++;
+			}
+			if(nivelGris == 0)
+				LUT[i] = 0;
+			else if((hAcDeseado.get(nivelGris) - numPixels) < (numPixels - hAcDeseado.get(nivelGris - 1)))
+				LUT[i] = nivelGris;
+			else
+				LUT[i] = nivelGris - 1;
+		}
+		
+		aplicarLUT(LUT);
+	}
+	
+	public void correccionGamma(ActionEvent event) throws IOException {
+		auxLabel.setText("Factor gamma");
+		auxButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+	        @Override public void handle(MouseEvent e) {
+	        	auxLabel.setVisible(false);
+	    		auxTextField.setVisible(false);
+	    		auxButton.setVisible(false);
+	            aplicarCorreccionGamma(new Double(auxTextField.getText()));
+	            auxButton.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
+	        }
+		});
+		
+		auxLabel.setVisible(true);
+		auxTextField.setVisible(true);
+		auxButton.setVisible(true);
+	}
+	
+	public void aplicarCorreccionGamma(double gamma) {
+		Integer[] LUT = new Integer[256];
+		
+		double a, b;
+		for(int i = 0; i <= 255; i++) {
+			a = (double) i / 255;
+			b = Math.pow(a, gamma);
+			LUT[i] = (int) Math.round(b * 255);
 		}
 		
 		aplicarLUT(LUT);
