@@ -3,6 +3,9 @@ package application;
 import javafx.scene.image.Image;
 
 public class DatosImagen {
+	private static int nImagenes = 0;
+	
+	String titulo;
 	Image imagen;
 	int size;
 	Histograma histograma;
@@ -15,6 +18,7 @@ public class DatosImagen {
 
 	
 	public DatosImagen(Image img) {
+		this.titulo = "Imagen " + ++nImagenes;
 		imagen = img;
 		update();
 	}
@@ -84,7 +88,8 @@ public class DatosImagen {
 	}
 	
 	public String toString() {
-		String cadena = "Size: " + size + "\nHistograma: " + histograma + "\nHistograma acumulativo: " + hAcumulativo;
+		String cadena = titulo + ":\n";
+		cadena = "Size: " + size + "\nHistograma: " + histograma + "\nHistograma acumulativo: " + hAcumulativo;
 		cadena += "Rango de valores: " + grisMin + " - " + grisMax;
 		cadena += "\nBrillo: " + brillo + "\nContraste: " + contraste + "\nEntropia: " + entropia + "\n";
 		return cadena;

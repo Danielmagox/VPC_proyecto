@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -42,8 +43,11 @@ import com.sun.istack.internal.logging.Logger;
  */
 public class MainController { //esto permite usar el objeto en el scene Builder
 	
-	static DatosImagen datosImagen;  //DATOS DE LA IMAGEN QUE ABRIMOS, SE GUARDAN AQUI COMO ESTATICOS PARA TRABAJAR CON ELLOS.
+	static DatosImagen datosImagenActiva;  //DATOS DE LA IMAGEN QUE ABRIMOS, SE GUARDAN AQUI COMO ESTATICOS PARA TRABAJAR CON ELLOS.
 	static ArrayList<DatosImagen> imagenes = new ArrayList<DatosImagen>(); //por si creamos muchas imagenes
+	
+	@FXML
+	ComboBox<String> cbImagenActiva;
 	
 	@FXML
 	Label auxLabel;
@@ -67,8 +71,9 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		try {
 			BufferedImage img1 = ImageIO.read(file);
 			Image image = SwingFXUtils.toFXImage(img1, null);
-			datosImagen = new DatosImagen(image);
-			imagenes.add(datosImagen); //metemos la imagen abierta en el arrayList
+			datosImagenActiva = new DatosImagen(image);
+			cbImagenActiva.getItems().add(datosImagenActiva.titulo);
+			imagenes.add(datosImagenActiva); //metemos la imagen abierta en el arrayList
 			/////////////////////////////////// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
 
 		} catch(IOException ex) {
@@ -79,11 +84,12 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("SecondController.fxml"));
 			Parent root = (Parent)loader.load();
 			SecondController secController = loader.getController();
-			secController.nuevaImagen(datosImagen.imagen);
-			secController.mostrarInfo(datosImagen.imagen); // Hacer que el controlador de la imagen muestre la info
+			secController.nuevaImagen(datosImagenActiva.imagen);
+			secController.mostrarInfo(datosImagenActiva.imagen); // Hacer que el controlador de la imagen muestre la info
 			secController.addMainController(this);
 			Stage stage = new Stage();
 			stage.setScene(new Scene(root));
+			stage.setTitle(datosImagenActiva.titulo);
 			stage.show();
 			///// Esto es para mandar la imagen elegida a la segunda ventana, se necesita si o si el segundo controlador
 		} catch(IOException e) {
@@ -112,13 +118,17 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		/////////////////////Si no se le pone la extensión se la pongo yo
 		if(file != null) {
 			ImageOutputStream ios = ImageIO.createImageOutputStream(file);
-			ImageIO.write(SwingFXUtils.fromFXImage(datosImagen.imagen,null), "tiff", ios);
+			ImageIO.write(SwingFXUtils.fromFXImage(datosImagenActiva.imagen,null), "tiff", ios);
 		////////////////////Se guarda la imagen
                     										
 		}
 	}
 	
 	public void abrirImagen(Image imagen) throws IOException {
+		datosImagenActiva = new DatosImagen(imagen);
+		cbImagenActiva.getItems().add(datosImagenActiva.titulo);
+		imagenes.add(datosImagenActiva);
+		
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("SecondController.fxml"));
 		Parent root = (Parent) loader.load();
 		SecondController secController = loader.getController();
@@ -127,10 +137,16 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		secController.addMainController(this);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
+		stage.setTitle(datosImagenActiva.titulo);
 		stage.show();
-		
-		datosImagen = new DatosImagen(imagen);
-		imagenes.add(datosImagen);
+	}
+	
+	public void seleccionarImagenActiva(ActionEvent event) {
+		String tituloImagenActiva = cbImagenActiva.getValue();
+		for(DatosImagen datosImagen: imagenes) {
+			if(datosImagen.titulo.equals(tituloImagenActiva))
+				datosImagenActiva = datosImagen;
+		}
 	}
 	
 	public void abrirMensaje(String texto) throws IOException {
@@ -145,10 +161,10 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	
 	public void verInfoBasica(ActionEvent event) throws IOException {
 		DecimalFormat df = new DecimalFormat("#.00");
-		String info = "Rango de valores: " + datosImagen.grisMin + " - " + datosImagen.grisMax + "\n";
-		info += "Brillo: " + df.format(datosImagen.brillo) + "\n";
-		info += "Contraste: " + df.format(datosImagen.contraste) + "\n";
-		info += "Entropía: " + df.format(datosImagen.entropia) + "\n";
+		String info = "Rango de valores: " + datosImagenActiva.grisMin + " - " + datosImagenActiva.grisMax + "\n";
+		info += "Brillo: " + df.format(datosImagenActiva.brillo) + "\n";
+		info += "Contraste: " + df.format(datosImagenActiva.contraste) + "\n";
+		info += "Entropía: " + df.format(datosImagenActiva.entropia) + "\n";
 		abrirMensaje(info);
 	}
 	
@@ -156,7 +172,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("HistogramController.fxml"));
 		Parent root = (Parent) loader.load();
 		HistogramController histogramController = loader.getController();
-		histogramController.mostrarHistograma(datosImagen.histograma);
+		histogramController.mostrarHistograma(datosImagenActiva.histograma);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
@@ -166,16 +182,16 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("HistogramController.fxml"));
 		Parent root = (Parent) loader.load();
 		HistogramController histogramController = loader.getController();
-		histogramController.mostrarHistograma(datosImagen.hAcumulativo);
+		histogramController.mostrarHistograma(datosImagenActiva.hAcumulativo);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
 	}
 	
 	public void escalaDeGrises(ActionEvent event) {
-		int width = (int) datosImagen.imagen.getWidth();
-		int height = (int) datosImagen.imagen.getHeight();
-		PixelReader reader = datosImagen.imagen.getPixelReader();
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
 		
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
@@ -229,7 +245,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		Parent root = (Parent) loader.load();
 		BrilloContrasteController bcc = loader.getController();
 		bcc.addMainController(this);
-		bcc.brilloContrasteActuales(datosImagen.brillo, datosImagen.contraste);
+		bcc.brilloContrasteActuales(datosImagenActiva.brillo, datosImagenActiva.contraste);
 		Stage stage = new Stage();
 		stage.setScene(new Scene(root));
 		stage.show();
@@ -239,8 +255,8 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		Integer[] LUT = new Integer[256];
 		
 		// Vout = m * Vin + n
-		double m = nuevoContraste / datosImagen.contraste;
-		double n = nuevoBrillo - m * datosImagen.brillo;
+		double m = nuevoContraste / datosImagenActiva.contraste;
+		double n = nuevoBrillo - m * datosImagenActiva.brillo;
 		
 		for(int i = 0; i <= 255; i++) {
 			LUT[i] = (int) Math.min(Math.round(m * i + n), 255);
@@ -253,10 +269,10 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	
 	public void ecualizar(ActionEvent event) throws IOException {
 		Integer[] LUT = new Integer[256];
-		ArrayList<Integer> hAcumulativo = datosImagen.hAcumulativo.numPixels;
+		ArrayList<Integer> hAcumulativo = datosImagenActiva.hAcumulativo.numPixels;
 		
 		for(int i = 0; i <= 255; i++) {
-			LUT[i] = Math.max(0, Math.round(256F/datosImagen.size * hAcumulativo.get(i)) - 1);
+			LUT[i] = Math.max(0, Math.round(256F/datosImagenActiva.size * hAcumulativo.get(i)) - 1);
 		}
 		
 		aplicarLUT(LUT);
@@ -285,7 +301,7 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		
 		// Obtener histogramas normalizados
 		for(int i = 0; i <= 255; i++) {
-			hAcActual.add((double) datosImagen.hAcumulativo.getNumPixels(i) / datosImagen.size);
+			hAcActual.add((double) datosImagenActiva.hAcumulativo.getNumPixels(i) / datosImagenActiva.size);
 			hAcDeseado.add((double) imagenEscogida.hAcumulativo.getNumPixels(i) / imagenEscogida.size);
 		}
 		
@@ -338,9 +354,9 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	}
 	
 	public void aplicarLUT(Integer[] LUT) {
-		int width = (int) datosImagen.imagen.getWidth();
-		int height = (int) datosImagen.imagen.getHeight();
-		PixelReader reader = datosImagen.imagen.getPixelReader();
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
 		
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
@@ -364,9 +380,9 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	}
 	
 	public void aplicarRoi(int x1, int y1, int x2, int y2) {
-		int width = (int) datosImagen.imagen.getWidth();
-		int height = (int) datosImagen.imagen.getHeight();
-		PixelReader reader = datosImagen.imagen.getPixelReader();
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
 		
 		WritableImage img = new WritableImage(x2 - x1, y2 - y1);
 		PixelWriter writer = img.getPixelWriter();
