@@ -38,8 +38,6 @@ public class SecondController {
 	
 	
 	public void nuevaImagen(Image imagen) {
-		imgView.getParent().maxWidth(imagen.getWidth());
-		imgView.getParent().maxHeight(imagen.getHeight());
 		imgView.setFitWidth(imagen.getWidth());
 		imgView.setFitHeight(imagen.getHeight());
 		imgView.setImage(imagen);
@@ -48,7 +46,6 @@ public class SecondController {
 	public void mostrarInfo(Image imagen) {
 		img = imagen;
 		String info = "Tamaño: " + (int) imgView.getImage().getWidth() + "x" +  (int) imgView.getImage().getHeight();
-		info += "";	// Falta tipo de la imagen
 		infoTamTipo.setText(info);
 	}
 	

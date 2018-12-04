@@ -13,10 +13,6 @@ public class DatosImagen {
 	float contraste;
 	float entropia;
 
-	int x1Roi;
-	int x2Roi;
-	int y1Roi;
-	int y2Roi;
 	
 	public DatosImagen(Image img) {
 		imagen = img;
@@ -31,10 +27,6 @@ public class DatosImagen {
 		calcularBrillo();
 		calcularContraste();
 		calcularEntropia();
-		x1Roi = 0;
-		x2Roi = (int) imagen.getWidth();
-		y1Roi = 0;
-		y2Roi = (int) imagen.getHeight();
 	}
 	
 	public void calcularRangoValores() {
@@ -89,13 +81,6 @@ public class DatosImagen {
 		}
 		
 		entropia = (float) - suma;
-	}
-	
-	public void quitarRoi() {
-		x1Roi = 0;
-		x2Roi = (int) imagen.getWidth();
-		y1Roi = 0;
-		y2Roi = (int) imagen.getHeight();
 	}
 	
 	public String toString() {

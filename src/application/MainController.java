@@ -180,16 +180,9 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
 		
-		// En principio copiamos la imagen por si después solo modificamos una ROI
-		for(int i = 0; i < width; i++) {
-			for(int j = 0; j < height; j++) {	
-				writer.setArgb(i, j, reader.getArgb(i, j));
-			}
-		}
-		
 		int nivelGris;
-		for(int i = datosImagen.x1Roi; i < datosImagen.x2Roi; i++) {
-			for(int j = datosImagen.y1Roi; j < datosImagen.y2Roi; j++) {
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
 				nivelGris = argbToGrey(reader.getArgb(i, j));
 				writer.setArgb(i, j, rgbToArgb(nivelGris, nivelGris, nivelGris));
 			}
@@ -351,18 +344,10 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		
 		WritableImage img = new WritableImage(width, height);
 		PixelWriter writer = img.getPixelWriter();
-		
-		
-		// En principio copiamos la imagen por si después solo modificamos una ROI
-		for(int i = 0; i < width; i++) {
-			for(int j = 0; j < height; j++) {	
-				writer.setArgb(i, j, reader.getArgb(i, j));
-			}
-		}
 			
 		int color, r, g, b;
-		for(int i = datosImagen.x1Roi; i < datosImagen.x2Roi; i++) {
-			for(int j = datosImagen.y1Roi; j < datosImagen.y2Roi; j++) {
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
 				color = reader.getArgb(i, j);
 				r = LUT[argbToRed(color)];
 				b = LUT[argbToBlue(color)];
@@ -378,15 +363,26 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		}
 	}
 	
-	public void quitarRoi(ActionEvent event) throws IOException {
-		datosImagen.quitarRoi();
-	}
-	
 	public void aplicarRoi(int x1, int y1, int x2, int y2) {
-		datosImagen.x1Roi = x1;
-		datosImagen.y1Roi = y1;
-		datosImagen.x2Roi = x2;
-		datosImagen.y2Roi = y2;
+		int width = (int) datosImagen.imagen.getWidth();
+		int height = (int) datosImagen.imagen.getHeight();
+		PixelReader reader = datosImagen.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(x2 - x1, y2 - y1);
+		PixelWriter writer = img.getPixelWriter();
+			
+		
+		for(int i = x1; i < Math.min(x2, width); i++) {
+			for(int j = y1; j < Math.min(y2, height); j++) {
+				writer.setArgb(i - x1, j - y1, reader.getArgb(i, j));
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static int argbToRed(int argb) {

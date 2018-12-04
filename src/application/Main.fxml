@@ -22,7 +22,6 @@
                   <Button mnemonicParsing="false" onAction="#escalaDeGrises" text="Pasar a escala de grises" />
                   <Button mnemonicParsing="false" onAction="#transformacionLinealTramos" text="Transformación lineal por tramos" />
                   <Button mnemonicParsing="false" onAction="#cambiarBrilloContraste" text="Cambiar brillo y contraste" />
-                  <Button mnemonicParsing="false" onAction="#quitarRoi" text="Quitar ROI" />
                   <Button mnemonicParsing="false" onAction="#ecualizar" text="Ecualizar" />
                   <Button mnemonicParsing="false" onAction="#especificarHistograma" text="Especificar histograma" />
                   <Button mnemonicParsing="false" onAction="#correccionGamma" text="Corrección gamma" />
