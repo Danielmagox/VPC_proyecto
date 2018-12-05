@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="300.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.DiferenciaImagenesController">
+   <children>
+      <ComboBox fx:id="cbImagen1" layoutX="75.0" layoutY="26.0" prefWidth="150.0" promptText="1ª Imagen" />
+      <ComboBox fx:id="cbImagen2" layoutX="75.0" layoutY="81.0" prefWidth="150.0" promptText="2ª Imagen" />
+      <Button layoutX="80.0" layoutY="157.0" mnemonicParsing="false" onAction="#imagenDiferencia" text="Imagen Diferencia" />
+      <Button layoutX="80.0" layoutY="211.0" mnemonicParsing="false" onAction="#visualizarCambios" text="Visualizar cambios" />
+   </children>
+</AnchorPane>

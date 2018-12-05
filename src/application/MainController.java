@@ -353,6 +353,128 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		aplicarLUT(LUT);
 	}
 	
+	public void diferenciaImagenes(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("DiferenciaImagenesController.fxml"));
+		Parent root = (Parent) loader.load();
+		DiferenciaImagenesController dic = loader.getController();
+		dic.addMainController(this);
+		dic.addListaImagenes(cbImagenActiva);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void aplicarDiferenciaImagenes(String imagen1, String imagen2) throws IOException {
+		DatosImagen datosImagen1 = null, datosImagen2 = null;
+		for(DatosImagen datosImagen: imagenes) {
+			if(datosImagen.titulo.equals(imagen1))
+				datosImagen1 = datosImagen;
+		}
+		for(DatosImagen datosImagen: imagenes) {
+			if(datosImagen.titulo.equals(imagen2))
+				datosImagen2 = datosImagen;
+		}
+		
+		int width1 = (int) datosImagen1.imagen.getWidth();
+		int height1 = (int) datosImagen1.imagen.getHeight();
+		int width2 = (int) datosImagen2.imagen.getWidth();
+		int height2 = (int) datosImagen2.imagen.getHeight();
+		
+		if((width1 != width2) || (height1 != height2)) {
+			abrirMensaje("Mismo tamaño requerido");
+		}
+		else {
+			PixelReader reader1 = datosImagen1.imagen.getPixelReader();
+			PixelReader reader2 = datosImagen2.imagen.getPixelReader();
+			
+			WritableImage img = new WritableImage(width1, height1);
+			PixelWriter writer = img.getPixelWriter();
+				
+			int color1, color2, r, g, b;
+			for(int i = 0; i < width1; i++) {
+				for(int j = 0; j < height1; j++) {
+					color1 = reader1.getArgb(i, j);
+					color2 = reader2.getArgb(i, j);
+					
+					r = Math.abs(argbToRed(color1) - argbToRed(color2));
+					b = Math.abs(argbToBlue(color1) - argbToBlue(color2));
+					g = Math.abs(argbToGreen(color1) - argbToGreen(color2));
+					writer.setArgb(i, j, rgbToArgb(r, g, b));
+				}
+			}
+			
+				try {
+					abrirImagen(img);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		public void detectarCambios(String imagen1, String imagen2) throws IOException {
+			DatosImagen datosImagen1 = null, datosImagen2 = null;
+			for(DatosImagen datosImagen: imagenes) {
+				if(datosImagen.titulo.equals(imagen1))
+					datosImagen1 = datosImagen;
+			}
+			for(DatosImagen datosImagen: imagenes) {
+				if(datosImagen.titulo.equals(imagen2))
+					datosImagen2 = datosImagen;
+			}
+			
+			int width1 = (int) datosImagen1.imagen.getWidth();
+			int height1 = (int) datosImagen1.imagen.getHeight();
+			int width2 = (int) datosImagen2.imagen.getWidth();
+			int height2 = (int) datosImagen2.imagen.getHeight();
+			
+			if((width1 != width2) || (height1 != height2)) {
+				abrirMensaje("Mismo tamaño requerido");
+			}
+			else {
+				PixelReader reader1 = datosImagen1.imagen.getPixelReader();
+				PixelReader reader2 = datosImagen2.imagen.getPixelReader();
+				
+				WritableImage img = new WritableImage(width1, height1);
+				PixelWriter writer = img.getPixelWriter();
+				
+				int[][] originalImg = new int[width1][height1];
+				int[][] greyDiff = new int[width1][height1];
+				int color1, color2;
+				for(int i = 0; i < width1; i++) {
+					for(int j = 0; j < height1; j++) {
+						color1 = reader1.getArgb(i, j);
+						color2 = reader2.getArgb(i, j);
+						originalImg[i][j] = color1;
+						greyDiff[i][j] = Math.abs(argbToGrey(color1) - argbToGrey(color2));
+						if(greyDiff[i][j] <= VisualizarCambiosController.UMBRAL_INICIAL)
+							writer.setArgb(i, j, originalImg[i][j]);	 // Píxel de la imagen original
+						else
+							writer.setArgb(i, j, rgbToArgb(255, 0, 0));  // Rojo
+					}
+				}
+				
+				try {
+					datosImagenActiva = new DatosImagen(img);
+					cbImagenActiva.getItems().add(datosImagenActiva.titulo);
+					imagenes.add(datosImagenActiva);
+					
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("VisualizarCambiosController.fxml"));
+					Parent root = (Parent) loader.load();
+					VisualizarCambiosController vcc = loader.getController();
+					vcc.nuevaImagen(img);
+					vcc.mostrarInfo(img);
+					vcc.addMainController(this);
+					vcc.addImagenOriginalyDiferencias(originalImg, greyDiff);
+					Stage stage = new Stage();
+					stage.setScene(new Scene(root));
+					stage.setTitle(datosImagenActiva.titulo);
+					stage.show();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+	}
+	
 	public void aplicarLUT(Integer[] LUT) {
 		int width = (int) datosImagenActiva.imagen.getWidth();
 		int height = (int) datosImagenActiva.imagen.getHeight();
