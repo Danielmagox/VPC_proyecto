@@ -439,13 +439,22 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 				
 				int[][] originalImg = new int[width1][height1];
 				int[][] greyDiff = new int[width1][height1];
-				int color1, color2;
+				int color1, color2, r, g, b;
 				for(int i = 0; i < width1; i++) {
 					for(int j = 0; j < height1; j++) {
 						color1 = reader1.getArgb(i, j);
 						color2 = reader2.getArgb(i, j);
 						originalImg[i][j] = color1;
-						greyDiff[i][j] = Math.abs(argbToGrey(color1) - argbToGrey(color2));
+						
+						// Media de las diferencias por banda ponderadas tal como
+						// se hace para pasar una imagen en color a escala de grises
+						//
+						// De esta forma el histograma de la imagen diferencia es una
+						// buena referencia para elegir un umbral
+						r = Math.abs(argbToRed(color1) - argbToRed(color2));
+						b = Math.abs(argbToBlue(color1) - argbToBlue(color2));
+						g = Math.abs(argbToGreen(color1) - argbToGreen(color2));
+						greyDiff[i][j] = argbToGrey(rgbToArgb(r, g, b));
 						if(greyDiff[i][j] <= VisualizarCambiosController.UMBRAL_INICIAL)
 							writer.setArgb(i, j, originalImg[i][j]);	 // Píxel de la imagen original
 						else

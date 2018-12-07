@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.geometry.Rectangle2D?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
@@ -40,18 +41,24 @@
                <children>
                   <GridPane>
                     <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="30.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
                         <Slider fx:id="slider" blockIncrement="1.0" max="255.0" onMouseClicked="#sliderMovido" showTickLabels="true" showTickMarks="true" value="10.0" GridPane.columnIndex="1" />
-                        <Label alignment="CENTER" contentDisplay="CENTER" text="Umbral" />
+                        <Label alignment="CENTER" contentDisplay="CENTER" text="Umbral">
+                           <GridPane.margin>
+                              <Insets bottom="8.0" />
+                           </GridPane.margin></Label>
                         <TextField GridPane.columnIndex="2" />
-                        <TextField fx:id="valorSlider" alignment="CENTER" GridPane.columnIndex="2" />
+                        <TextField fx:id="valorSlider" alignment="CENTER" GridPane.columnIndex="2">
+                           <GridPane.margin>
+                              <Insets />
+                           </GridPane.margin></TextField>
                      </children>
                   </GridPane>
                   <GridPane GridPane.rowIndex="1">
