@@ -411,77 +411,173 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 			}
 		}
 		
-		public void detectarCambios(String imagen1, String imagen2) throws IOException {
-			DatosImagen datosImagen1 = null, datosImagen2 = null;
-			for(DatosImagen datosImagen: imagenes) {
-				if(datosImagen.titulo.equals(imagen1))
-					datosImagen1 = datosImagen;
-			}
-			for(DatosImagen datosImagen: imagenes) {
-				if(datosImagen.titulo.equals(imagen2))
-					datosImagen2 = datosImagen;
-			}
+	public void detectarCambios(String imagen1, String imagen2) throws IOException {
+		DatosImagen datosImagen1 = null, datosImagen2 = null;
+		for(DatosImagen datosImagen: imagenes) {
+			if(datosImagen.titulo.equals(imagen1))
+				datosImagen1 = datosImagen;
+		}
+		for(DatosImagen datosImagen: imagenes) {
+			if(datosImagen.titulo.equals(imagen2))
+				datosImagen2 = datosImagen;
+		}
+		
+		int width1 = (int) datosImagen1.imagen.getWidth();
+		int height1 = (int) datosImagen1.imagen.getHeight();
+		int width2 = (int) datosImagen2.imagen.getWidth();
+		int height2 = (int) datosImagen2.imagen.getHeight();
+		
+		if((width1 != width2) || (height1 != height2)) {
+			abrirMensaje("Mismo tamaño requerido");
+		}
+		else {
+			PixelReader reader1 = datosImagen1.imagen.getPixelReader();
+			PixelReader reader2 = datosImagen2.imagen.getPixelReader();
 			
-			int width1 = (int) datosImagen1.imagen.getWidth();
-			int height1 = (int) datosImagen1.imagen.getHeight();
-			int width2 = (int) datosImagen2.imagen.getWidth();
-			int height2 = (int) datosImagen2.imagen.getHeight();
+			WritableImage img = new WritableImage(width1, height1);
+			PixelWriter writer = img.getPixelWriter();
 			
-			if((width1 != width2) || (height1 != height2)) {
-				abrirMensaje("Mismo tamaño requerido");
-			}
-			else {
-				PixelReader reader1 = datosImagen1.imagen.getPixelReader();
-				PixelReader reader2 = datosImagen2.imagen.getPixelReader();
-				
-				WritableImage img = new WritableImage(width1, height1);
-				PixelWriter writer = img.getPixelWriter();
-				
-				int[][] originalImg = new int[width1][height1];
-				int[][] greyDiff = new int[width1][height1];
-				int color1, color2, r, g, b;
-				for(int i = 0; i < width1; i++) {
-					for(int j = 0; j < height1; j++) {
-						color1 = reader1.getArgb(i, j);
-						color2 = reader2.getArgb(i, j);
-						originalImg[i][j] = color1;
-						
-						// Media de las diferencias por banda ponderadas tal como
-						// se hace para pasar una imagen en color a escala de grises
-						//
-						// De esta forma el histograma de la imagen diferencia es una
-						// buena referencia para elegir un umbral
-						r = Math.abs(argbToRed(color1) - argbToRed(color2));
-						b = Math.abs(argbToBlue(color1) - argbToBlue(color2));
-						g = Math.abs(argbToGreen(color1) - argbToGreen(color2));
-						greyDiff[i][j] = argbToGrey(rgbToArgb(r, g, b));
-						if(greyDiff[i][j] <= VisualizarCambiosController.UMBRAL_INICIAL)
-							writer.setArgb(i, j, originalImg[i][j]);	 // Píxel de la imagen original
-						else
-							writer.setArgb(i, j, rgbToArgb(255, 0, 0));  // Rojo
-					}
-				}
-				
-				try {
-					datosImagenActiva = new DatosImagen(img);
-					cbImagenActiva.getItems().add(datosImagenActiva.titulo);
-					imagenes.add(datosImagenActiva);
+			int[][] originalImg = new int[width1][height1];
+			int[][] greyDiff = new int[width1][height1];
+			int color1, color2, r, g, b;
+			for(int i = 0; i < width1; i++) {
+				for(int j = 0; j < height1; j++) {
+					color1 = reader1.getArgb(i, j);
+					color2 = reader2.getArgb(i, j);
+					originalImg[i][j] = color1;
 					
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("VisualizarCambiosController.fxml"));
-					Parent root = (Parent) loader.load();
-					VisualizarCambiosController vcc = loader.getController();
-					vcc.nuevaImagen(img);
-					vcc.mostrarInfo(img);
-					vcc.addMainController(this);
-					vcc.addImagenOriginalyDiferencias(originalImg, greyDiff);
-					Stage stage = new Stage();
-					stage.setScene(new Scene(root));
-					stage.setTitle(datosImagenActiva.titulo);
-					stage.show();
-				} catch (IOException e) {
-					e.printStackTrace();
+					// Media de las diferencias por banda ponderadas tal como
+					// se hace para pasar una imagen en color a escala de grises
+					//
+					// De esta forma el histograma de la imagen diferencia es una
+					// buena referencia para elegir un umbral
+					r = Math.abs(argbToRed(color1) - argbToRed(color2));
+					b = Math.abs(argbToBlue(color1) - argbToBlue(color2));
+					g = Math.abs(argbToGreen(color1) - argbToGreen(color2));
+					greyDiff[i][j] = argbToGrey(rgbToArgb(r, g, b));
+					if(greyDiff[i][j] <= VisualizarCambiosController.UMBRAL_INICIAL)
+						writer.setArgb(i, j, originalImg[i][j]);	 // Píxel de la imagen original
+					else
+						writer.setArgb(i, j, rgbToArgb(255, 0, 0));  // Rojo
 				}
 			}
+			
+			try {
+				datosImagenActiva = new DatosImagen(img);
+				cbImagenActiva.getItems().add(datosImagenActiva.titulo);
+				imagenes.add(datosImagenActiva);
+				
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("VisualizarCambiosController.fxml"));
+				Parent root = (Parent) loader.load();
+				VisualizarCambiosController vcc = loader.getController();
+				vcc.nuevaImagen(img);
+				vcc.mostrarInfo(img);
+				vcc.addMainController(this);
+				vcc.addImagenOriginalyDiferencias(originalImg, greyDiff);
+				Stage stage = new Stage();
+				stage.setScene(new Scene(root));
+				stage.setTitle(datosImagenActiva.titulo);
+				stage.show();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void perfil(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("PerfilController.fxml"));
+		Parent root = (Parent) loader.load();
+		PerfilController perfilController = loader.getController();
+		perfilController.addMainController(this);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public ArrayList<Par> bresenham(int x0, int y0, int x1, int y1) {
+		ArrayList<Par> puntos = new ArrayList<Par>();
+		
+		int x, y, dx, dy, p, incE, incNE, stepx, stepy;
+		dx = (x1 - x0);
+		dy = (y1 - y0);
+
+		/* determinar que punto usar para empezar, cual para terminar */
+		if (dy < 0) {
+			dy = -dy;
+			stepy = -1;
+		} else {
+			stepy = 1;
+		}
+
+		if (dx < 0) {
+			dx = -dx;
+			stepx = -1;
+		} else {
+			stepx = 1;
+		}
+
+		x = x0;
+		y = y0;
+		//g.drawLine(x0, y0, x0, y0);
+		puntos.add(new Par(x0, y0));
+		/* se cicla hasta llegar al extremo de la línea */
+		if (dx > dy) {
+			p = 2 * dy - dx;
+			incE = 2 * dy;
+			incNE = 2 * (dy - dx);
+			while (x != x1) {
+				x = x + stepx;
+				if (p < 0) {
+					p = p + incE;
+				} else {
+					y = y + stepy;
+					p = p + incNE;
+				}
+				//g.drawLine(x, y, x, y);
+				puntos.add(new Par(x, y));
+			}
+		} else {
+			p = 2 * dx - dy;
+			incE = 2 * dx;
+			incNE = 2 * (dx - dy);
+			while (y != y1) {
+				y = y + stepy;
+				if (p < 0) {
+					p = p + incE;
+				} else {
+					x = x + stepx;
+					p = p + incNE;
+				}
+				//g.drawLine(x, y, x, y);
+				puntos.add(new Par(x, y));
+			}
+		}
+		
+		return puntos;
+	}
+	
+	public void aplicarPerfil(int x0, int y0, int x1, int y1) throws IOException {
+		ArrayList<Par> puntos = bresenham(x0, y0, x1, y1);
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		ArrayList<Integer> nivelesGris = new ArrayList<Integer>();
+		for(Par p: puntos) {
+			nivelesGris.add(argbToGrey(reader.getArgb(p.x, p.y)));
+		}
+		
+		ArrayList<Integer> diferencias = new ArrayList<Integer>();
+		for(int i = 1; i < nivelesGris.size(); i++) {
+			diferencias.add(nivelesGris.get(i) - nivelesGris.get(i-1));
+		}
+		
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("VerPerfilController.fxml"));
+		Parent root = (Parent) loader.load();
+		VerPerfilController verPerfilController = loader.getController();
+		verPerfilController.mostrarNivelesGris(nivelesGris);
+		verPerfilController.mostrarDiferencias(diferencias);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
 	}
 	
 	public void aplicarLUT(Integer[] LUT) {
