@@ -28,6 +28,7 @@
                   <Button mnemonicParsing="false" onAction="#correccionGamma" text="Corrección gamma" />
                   <Button mnemonicParsing="false" onAction="#diferenciaImagenes" text="Diferencia de Imágenes" />
                   <Button mnemonicParsing="false" onAction="#perfil" text="Perfil" />
+                  <Button mnemonicParsing="false" onAction="#digitalizacion" text="Simular digitalización" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" top="5.0" />

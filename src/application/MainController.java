@@ -580,6 +580,112 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		stage.show();
 	}
 	
+	public void aplicarPerfilSuavizado(int x0, int y0, int x1, int y1) throws IOException {
+		ArrayList<Par> puntos = bresenham(x0, y0, x1, y1);
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		ArrayList<Integer> nivelesGris = new ArrayList<Integer>();
+		for(Par p: puntos) {
+			nivelesGris.add(argbToGrey(reader.getArgb(p.x, p.y)));
+		}
+		for(int i = 2; i < nivelesGris.size() - 2; i++) {
+			nivelesGris.set(i, (nivelesGris.get(i-2) + nivelesGris.get(i-1) + nivelesGris.get(i)
+							+ nivelesGris.get(i+1) + nivelesGris.get(i+2)) / 5);
+		}
+		
+		ArrayList<Integer> diferencias = new ArrayList<Integer>();
+		for(int i = 1; i < nivelesGris.size(); i++) {
+			diferencias.add(nivelesGris.get(i) - nivelesGris.get(i-1));
+		}
+		
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("VerPerfilController.fxml"));
+		Parent root = (Parent) loader.load();
+		VerPerfilController verPerfilController = loader.getController();
+		verPerfilController.mostrarNivelesGris(nivelesGris);
+		verPerfilController.mostrarDiferencias(diferencias);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void digitalizacion(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("DigitalizacionController.fxml"));
+		Parent root = (Parent) loader.load();
+		DigitalizacionController digitalizacionController = loader.getController();
+		digitalizacionController.addMainController(this);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void aplicarDigitalizacion(int tamano, int numBits) {
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		// Truncamos con la división entera para quitar los pixels que no puedan completar una región
+		int newWidth = width / tamano * tamano;
+		int newHeight = height / tamano * tamano;
+		Integer[][] resultado = new Integer[newWidth][newHeight];
+		
+		int media = 0;
+		int mediaR = 0;
+		int mediaG = 0;
+		int mediaB = 0;
+		for(int i = 0; i <= newWidth - tamano; i += tamano) {
+			for(int j = 0; j <= newHeight - tamano; j += tamano) {
+				mediaR = 0;
+				mediaG = 0;
+				mediaB = 0;
+				for(int k = 0; k < tamano; k++) {
+					for(int s = 0; s < tamano; s++) {
+						mediaR += argbToRed(reader.getArgb(i + k, j + s));
+						mediaG += argbToGreen(reader.getArgb(i + k, j + s));
+						mediaB += argbToBlue(reader.getArgb(i + k, j + s));
+					}
+				}
+				mediaR = Math.round((float) (mediaR) / (tamano * tamano));
+				mediaG = Math.round((float) (mediaG) / (tamano * tamano));
+				mediaB = Math.round((float) (mediaB) / (tamano * tamano));
+				media = rgbToArgb(mediaR, mediaG, mediaB);
+				for(int k = 0; k < tamano; k++) {
+					for(int l = 0; l < tamano; l++) {
+						resultado[i + k][j + l] = media;
+					}
+				}
+			}
+		}
+
+		
+		WritableImage img = new WritableImage(newWidth, newHeight);
+		PixelWriter writer = img.getPixelWriter();
+		
+		// Escalamos a un intervalo de tamaño numBits^2 - 1, redondeamos y reescalamos
+		int r, g, b;
+		int maxRelativeVal = (int) Math.pow(numBits, 2) - 1;
+		for(int i = 0; i < newWidth; i++) {
+			for(int j = 0; j < newHeight; j++) {
+				if(numBits > 1) {
+					r = Math.round(argbToRed(resultado[i][j]) * maxRelativeVal / 255F) * 255 / maxRelativeVal;
+					g = Math.round(argbToGreen(resultado[i][j]) * maxRelativeVal / 255F) * 255 / maxRelativeVal;
+					b = Math.round(argbToBlue(resultado[i][j]) * maxRelativeVal / 255F) * 255 / maxRelativeVal;
+				}
+				else {
+					r = Math.round(argbToRed(resultado[i][j]) / 255F) * 255;
+					g = Math.round(argbToGreen(resultado[i][j]) / 255F) * 255;
+					b = Math.round(argbToBlue(resultado[i][j]) / 255F) * 255;
+				}
+				writer.setArgb(i, j, rgbToArgb(r, g, b));
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void aplicarLUT(Integer[] LUT) {
 		int width = (int) datosImagenActiva.imagen.getWidth();
 		int height = (int) datosImagenActiva.imagen.getHeight();
