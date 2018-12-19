@@ -29,6 +29,12 @@
                   <Button mnemonicParsing="false" onAction="#diferenciaImagenes" text="Diferencia de Imágenes" />
                   <Button mnemonicParsing="false" onAction="#perfil" text="Perfil" />
                   <Button mnemonicParsing="false" onAction="#digitalizacion" text="Simular digitalización" />
+                  <Button mnemonicParsing="false" onAction="#espejoVertical" text="Espejo Vertical" />
+                  <Button mnemonicParsing="false" onAction="#espejoHorizontal" text="Espejo Horizontal" />
+                  <Button mnemonicParsing="false" onAction="#traspuesta" text="Traspuesta" />
+                  <Button mnemonicParsing="false" onAction="#rotacion90" text="Rotación 90º" />
+                  <Button mnemonicParsing="false" onAction="#rotacion180" text="Rotación 180º" />
+                  <Button mnemonicParsing="false" onAction="#rotacion270" text="Rotación 270º" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" top="5.0" />

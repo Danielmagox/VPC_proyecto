@@ -712,6 +712,115 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		}
 	}
 	
+	////// ----- Operaciones geométricas ----- ///////
+	public Image espejoVertical() {
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(width, height);
+		PixelWriter writer = img.getPixelWriter();
+			
+		int color;
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				color = reader.getArgb(i, j);
+				writer.setArgb(i, height - 1 - j, color);
+			}
+		}
+		
+		return img;
+	}
+	
+	public void espejoVertical(ActionEvent event) {
+		try {
+			abrirImagen(espejoVertical());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Image espejoHorizontal() {
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(width, height);
+		PixelWriter writer = img.getPixelWriter();
+			
+		int color;
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				color = reader.getArgb(i, j);
+				writer.setArgb(width - 1 - i, j, color);
+			}
+		}
+		
+		return img;
+	}
+	
+	public void espejoHorizontal(ActionEvent event) {
+		try {
+			abrirImagen(espejoHorizontal());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Image traspuesta() {
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(height, width);
+		PixelWriter writer = img.getPixelWriter();
+			
+		int color;
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				color = reader.getArgb(i, j);
+				writer.setArgb(j, i, color);
+			}
+		}
+		
+		return img;
+	}
+	
+	public void traspuesta(ActionEvent event) {
+		try {
+			abrirImagen(traspuesta());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void rotacion90(ActionEvent event) {
+		datosImagenActiva.imagen = traspuesta();
+		try {
+			abrirImagen(espejoHorizontal());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void rotacion180(ActionEvent event) {
+		datosImagenActiva.imagen = espejoVertical();
+		try {
+			abrirImagen(espejoHorizontal());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void rotacion270(ActionEvent event) {
+		datosImagenActiva.imagen = espejoHorizontal();
+		try {
+			abrirImagen(traspuesta());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void aplicarRoi(int x1, int y1, int x2, int y2) {
 		int width = (int) datosImagenActiva.imagen.getWidth();
 		int height = (int) datosImagenActiva.imagen.getHeight();
