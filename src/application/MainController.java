@@ -56,6 +56,8 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	@FXML
 	Button auxButton;
 	
+	public static enum TipoInterpolacion {VECINO_MAS_PROXIMO, BILINEAL};
+	
 	/**
 	 * @param event evento que se manda al boton para abrir la nueva ventana y el 2º Controller con la imagen dentro
 	 * @throws IOException Por si explota
@@ -67,14 +69,14 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		fileChooser.getExtensionFilters().addAll(extFilterTiff);
 		fileChooser.getExtensionFilters().addAll(extFilterJPG);
 		File file = fileChooser.showOpenDialog(null);		
-		//////////////////////////// Hasta aquí es para filtrar los jpg, y tiff y poder elegirlos y guardarlos en el file
+		/// Hasta aquí es para filtrar los jpg, y tiff y poder elegirlos y guardarlos en el file
 		try {
 			BufferedImage img1 = ImageIO.read(file);
 			Image image = SwingFXUtils.toFXImage(img1, null);
 			datosImagenActiva = new DatosImagen(image);
 			cbImagenActiva.getItems().add(datosImagenActiva.titulo);
 			imagenes.add(datosImagenActiva); //metemos la imagen abierta en el arrayList
-			/////////////////////////////////// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
+			/// Se lee la imagen como ImageIO y se convierte a Image porque es tiff.
 
 		} catch(IOException ex) {
 			System.out.println(ex.getMessage());
@@ -110,16 +112,16 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		filechooser.setTitle("Guardar Imagen");
 		File file = filechooser.showSaveDialog(null);
 		ruta = file.getAbsolutePath();
-		//////////////////////Pillar donde se quiere guardar
+		/// Pillar donde se quiere guardar
 		if(!ruta.endsWith(".tiff") && !ruta.endsWith(".TIF")) {
 			file = new File(ruta + ".tiff");
 			ruta = ruta + ".tiff";
 		}
-		/////////////////////Si no se le pone la extensión se la pongo yo
+		/// Si no se le pone la extensión se la pongo yo
 		if(file != null) {
 			ImageOutputStream ios = ImageIO.createImageOutputStream(file);
 			ImageIO.write(SwingFXUtils.fromFXImage(datosImagenActiva.imagen,null), "tiff", ios);
-		////////////////////Se guarda la imagen
+		/// Se guarda la imagen
                     										
 		}
 	}
@@ -821,6 +823,49 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		}
 	}
 	
+	public void escalado(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("EscaladoController.fxml"));
+		Parent root = (Parent) loader.load();
+		EscaladoController escaladoController = loader.getController();
+		escaladoController.addMainController(this);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void aplicarPorcentajeEscalado(double cambioX, double cambioY, TipoInterpolacion tipoInterpolacion) {
+		aplicarEscalado(cambioX, cambioY, (int) Math.floor(datosImagenActiva.imagen.getWidth() * cambioX),
+						(int) Math.floor(datosImagenActiva.imagen.getHeight() * cambioY), tipoInterpolacion);
+	}
+	
+	public void aplicarDimensionesEscalado(int newWidth, int newHeight, TipoInterpolacion tipoInterpolacion) {
+		aplicarEscalado((double) newWidth / datosImagenActiva.imagen.getWidth(),
+						(double) newHeight / datosImagenActiva.imagen.getHeight(), 
+						newWidth, newHeight, tipoInterpolacion);
+	}
+
+	public void aplicarEscalado(double cambioX, double cambioY, int newWidth, int newHeight, TipoInterpolacion tipoInterpolacion) {
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		
+		WritableImage img = new WritableImage(newWidth, newHeight);
+		PixelWriter writer = img.getPixelWriter();
+			
+		
+		for(int i = 0; i < newWidth; i++) {
+			for(int j = 0; j < newHeight; j++) {
+				writer.setArgb(i, j, interpolar(tipoInterpolacion, i / cambioX, j / cambioY, width, height, reader));
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void aplicarRoi(int x1, int y1, int x2, int y2) {
 		int width = (int) datosImagenActiva.imagen.getWidth();
 		int height = (int) datosImagenActiva.imagen.getHeight();
@@ -841,6 +886,56 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static int interpolar(TipoInterpolacion tipoInterpolacion, double x, double y, int width, int height, PixelReader reader) {
+		switch(tipoInterpolacion) {
+			case VECINO_MAS_PROXIMO:
+				return interpolacionVecinoMasProximo(x, y, width, height, reader);
+			case BILINEAL:
+				return interpolacionBilineal(x, y, width, height, reader);
+			default:
+				return interpolacionBilineal(x, y, width, height, reader);
+		}
+	}
+	
+	public static int interpolacionVecinoMasProximo(double x, double y, int width, int height, PixelReader reader) {
+		return reader.getArgb((int) Math.min(Math.round(x), width - 1), (int) Math.min(Math.round(y), height - 1));
+	}
+	
+	public static int interpolacionBilineal(double x, double y, int width, int height, PixelReader reader) {
+		/*
+		 * A        B
+		 * 
+		 *    P
+		 * 
+		 * C        D
+		 */
+		int xA, yA, xB, yB, xC, yC, xD, yD;
+		xA = xC = (int) Math.floor(x);
+		xB = xD = Math.min((int) Math.ceil(x), width - 1);
+		yA = yB = Math.min((int) Math.ceil(y), height - 1);
+		yC = yD = (int) Math.floor(y);
+		
+		// (p,q) --> posición de P relativa a C
+		double p = x - xC;
+		double q = y - yC;
+		
+		// Colores de A, B, C and D
+		int A, B, C, D;
+		A = reader.getArgb(xA, yA);
+		B = reader.getArgb(xB, yB);
+		C = reader.getArgb(xC, yC);
+		D = reader.getArgb(xD, yD);
+		
+		int red = (int) Math.round(argbToRed(C) + (argbToRed(D) - argbToRed(C)) * p + (argbToRed(A) - argbToRed(C)) * q
+				+ (argbToRed(B) - argbToRed(A) - argbToRed(D) + argbToRed(C)) * p * q);
+		int green = (int) Math.round(argbToGreen(C) + (argbToGreen(D) - argbToGreen(C)) * p + (argbToGreen(A) - argbToGreen(C)) * q
+				  + (argbToGreen(B) - argbToGreen(A) - argbToGreen(D) + argbToGreen(C)) * p * q);
+		int blue = (int) Math.round(argbToBlue(C) + (argbToBlue(D) - argbToBlue(C)) * p + (argbToBlue(A) - argbToBlue(C)) * q
+				 + (argbToBlue(B) - argbToBlue(A) - argbToBlue(D) + argbToBlue(C)) * p * q);
+				
+		return rgbToArgb(red, green, blue);
 	}
 	
 	public static int argbToRed(int argb) {

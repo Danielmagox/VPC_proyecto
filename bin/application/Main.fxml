@@ -35,6 +35,7 @@
                   <Button mnemonicParsing="false" onAction="#rotacion90" text="Rotación 90º" />
                   <Button mnemonicParsing="false" onAction="#rotacion180" text="Rotación 180º" />
                   <Button mnemonicParsing="false" onAction="#rotacion270" text="Rotación 270º" />
+                  <Button mnemonicParsing="false" onAction="#escalado" text="Escalado" />
                </children>
                <padding>
                   <Insets left="5.0" right="5.0" top="5.0" />
