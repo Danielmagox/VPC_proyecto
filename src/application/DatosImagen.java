@@ -24,13 +24,23 @@ public class DatosImagen {
 	}
 	
 	public void update() {
-		size = (int) (imagen.getWidth() * imagen.getHeight());
+		calcularSize();
 		histograma = new Histograma(imagen);
 		hAcumulativo = new HistogramaAcumulativo(histograma);
 		calcularRangoValores();
 		calcularBrillo();
 		calcularContraste();
 		calcularEntropia();
+	}
+	
+	public void calcularSize() {
+		size = 0;
+		for(int i = 0; i < imagen.getWidth(); i++) {
+			for(int j = 0; j < imagen.getHeight(); j++) {
+				if(MainController.argbToA(imagen.getPixelReader().getArgb(i, j)) != 0)
+					size++;
+			}
+		}
 	}
 	
 	public void calcularRangoValores() {

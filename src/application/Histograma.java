@@ -14,8 +14,9 @@ public class Histograma {
 		
 		for(int i = 0; i < img.getWidth(); i++) {
 			for(int j = 0; j < img.getHeight(); j++) {
-				numPixels.set(MainController.argbToGrey(img.getPixelReader().getArgb(i, j)),
-						numPixels.get(MainController.argbToGrey(img.getPixelReader().getArgb(i, j))) + 1);
+				if(MainController.argbToA(img.getPixelReader().getArgb(i, j)) != 0)
+						numPixels.set(MainController.argbToGrey(img.getPixelReader().getArgb(i, j)),
+								numPixels.get(MainController.argbToGrey(img.getPixelReader().getArgb(i, j))) + 1);
 			}
 		}
 	}

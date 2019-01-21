@@ -851,11 +851,78 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		
 		WritableImage img = new WritableImage(newWidth, newHeight);
 		PixelWriter writer = img.getPixelWriter();
-			
-		
+				
 		for(int i = 0; i < newWidth; i++) {
 			for(int j = 0; j < newHeight; j++) {
 				writer.setArgb(i, j, interpolar(tipoInterpolacion, i / cambioX, j / cambioY, width, height, reader));
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void rotacionLibre(ActionEvent event) throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("RotacionController.fxml"));
+		Parent root = (Parent) loader.load();
+		RotacionController rotacionController = loader.getController();
+		rotacionController.addMainController(this);
+		Stage stage = new Stage();
+		stage.setScene(new Scene(root));
+		stage.show();
+	}
+	
+	public void aplicarRotarYPintar(double angulo) {
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		RectanguloExterior r = new RectanguloExterior(width, height, angulo);
+		
+		WritableImage img = new WritableImage(r.ancho, r.alto);
+		PixelWriter writer = img.getPixelWriter();
+			
+		int color;
+		for(int i = 0; i < width; i++) {
+			for(int j = 0; j < height; j++) {
+				color = reader.getArgb(i, j);
+				writer.setArgb((int) Math.round(xTD(i, j, angulo)) - r.despX1, (int) Math.round(yTD(i, j, angulo)) - r.despY1, color);
+			}
+		}
+		
+		try {
+			abrirImagen(img);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void aplicarRotacionLibre(double angulo, TipoInterpolacion tipoInterpolacion) {
+		PixelReader reader = datosImagenActiva.imagen.getPixelReader();
+		int width = (int) datosImagenActiva.imagen.getWidth();
+		int height = (int) datosImagenActiva.imagen.getHeight();
+		RectanguloExterior r = new RectanguloExterior(width, height, angulo);
+		
+		//System.out.println(r.ancho + "x" + r.alto);
+		//System.out.println(r.despX1 + " " + r.despX2 + " " + r.despY1 + " " + r.despY2);
+		
+		WritableImage img = new WritableImage(r.ancho, r.alto);
+		PixelWriter writer = img.getPixelWriter();
+			
+		int color;
+		double x, y;
+		for(int i = 0; i < r.ancho; i++) {
+			for(int j = 0; j < r.alto; j++) {
+				x = xTI(i + r.despX1, j + r.despY1, angulo);
+				y = yTI(i + r.despX1, j + r.despY1, angulo);
+				if(x >= 0 && x <= width - 1 && y >= 0 && y <= height - 1) {
+					color = interpolar(tipoInterpolacion, x, y, width, height, reader);
+					writer.setArgb(i, j, color);
+				}
+				else
+					writer.setArgb(i, j, 0);	// Transparente
 			}
 		}
 		
@@ -899,6 +966,24 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		}
 	}
 	
+	// Transformacion de coordenadas en las rotaciones
+	
+	public static double xTD(int x, int y, double angulo) {
+		return x * Math.cos(angulo) - y * Math.sin(angulo);
+	}
+	
+	public static double yTD(int x, int y, double angulo) {
+		return x * Math.sin(angulo) + y * Math.cos(angulo);
+	}
+	
+	public static double xTI(int xPrima, int yPrima, double angulo) {
+		return xPrima * Math.cos(angulo) + yPrima * Math.sin(angulo);
+	}
+	
+	public static double yTI(int xPrima, int yPrima, double angulo) {
+		return -xPrima * Math.sin(angulo) + yPrima * Math.cos(angulo);
+	}
+	
 	public static int interpolacionVecinoMasProximo(double x, double y, int width, int height, PixelReader reader) {
 		return reader.getArgb((int) Math.min(Math.round(x), width - 1), (int) Math.min(Math.round(y), height - 1));
 	}
@@ -928,6 +1013,10 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 		C = reader.getArgb(xC, yC);
 		D = reader.getArgb(xD, yD);
 		
+		// Si alguno de los píxeles es transparente, que sea transparente
+		if(argbToA(A) == 0 || argbToA(B) == 0 || argbToA(C) == 0 || argbToA(D) == 0)
+			return 0;
+		
 		int red = (int) Math.round(argbToRed(C) + (argbToRed(D) - argbToRed(C)) * p + (argbToRed(A) - argbToRed(C)) * q
 				+ (argbToRed(B) - argbToRed(A) - argbToRed(D) + argbToRed(C)) * p * q);
 		int green = (int) Math.round(argbToGreen(C) + (argbToGreen(D) - argbToGreen(C)) * p + (argbToGreen(A) - argbToGreen(C)) * q
@@ -948,6 +1037,10 @@ public class MainController { //esto permite usar el objeto en el scene Builder
 	
 	public static int argbToBlue(int argb) {
 		return argb & 0xff;
+	}
+	
+	public static int argbToA(int argb) {
+		return argb >> 24;
 	}
 	
 	public static int argbToGrey(int argb) {
